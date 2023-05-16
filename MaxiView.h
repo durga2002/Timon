@@ -27,6 +27,8 @@ signals:
 	void activityChanged(int activity);
 
 private:
+	void leave();
+	
 	Ui::MaxiViewClass m_ui;
 	QScreen* m_screen = nullptr;
 	int m_timer;
