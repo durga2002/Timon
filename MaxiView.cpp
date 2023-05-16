@@ -53,19 +53,21 @@ void MaxiView::showEvent(QShowEvent* event)
 
 void MaxiView::timerEvent(QTimerEvent* e)
 {
+    leave();
+}
+
+void MaxiView::leaveEvent(QEvent* event)
+{
+    leave();
+}
+
+void MaxiView::leave()
+{
     if (m_timer)
     {
         killTimer(m_timer);
         m_timer = 0;
     }
-    if (isVisible())
-    {
-        emit userLeft();
-    }
-}
-
-void MaxiView::leaveEvent(QEvent* event)
-{
     emit userLeft();
 }
 
