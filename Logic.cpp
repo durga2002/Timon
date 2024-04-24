@@ -48,17 +48,19 @@ void Logic::updateActivity(int activity)
     const std::tm lastUpdateMidnight = midnight(m_lastTimeUpdated);
     if (dayChanged(lastUpdateMidnight, lastMidnight))
     {
-        // The known feature/glitch/bug: supposed IDLE state from m_lastTimeUpdated to the midnight, 
-        // so this time interval can be ignored.
-        m_lastTimeUpdated = std::chrono::system_clock::from_time_t(mktime(&lastMidnight));
+        // ignore the previous activity -- whatever it was, reset to IDLE.
+        activity = IDLE;
         for (auto& timer : m_timeCounters)
         {
             timer = 0;
         }
     }
+    else
+    {
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - m_lastTimeUpdated);
+        m_timeCounters[m_currentActivity] += duration.count();
+    }
 
-    auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - m_lastTimeUpdated);
-    m_timeCounters[m_currentActivity] += duration.count();
     m_lastTimeUpdated = now;
     m_currentActivity = activity;
     updateLog();
@@ -142,7 +144,7 @@ void Logic::timerEvent(QTimerEvent* e)
 
 void Logic::updateLog()
 {
-    QMutexLocker<QMutex> locker(&m_mutex); // who knows, maybe it's mutlithreaded app...
+    QMutexLocker<QMutex> locker(&m_mutex); // who knows, maybe it's multithreaded app...
 
     QFile fCurrentfLog(m_sLogFileBaseName);
     if (!fCurrentfLog.open(QIODevice::ReadOnly | QIODevice::Text))
